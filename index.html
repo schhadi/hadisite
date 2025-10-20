@@ -240,6 +240,35 @@ main{ text-align:center; padding:0 16px; }
   .fade-blur .overlay-content{ padding:.9rem 1rem; margin:0 10px; }
 }
 
+/* Ensure the overlay's global close (×) is always tappable above the panel */
+.close{ z-index: 3; }
+
+/* Mobile: add an internal close in slide panels, sticky at the top */
+@media (max-width: 720px){
+  .panel {
+    position: absolute;
+    inset: 0 0 0 auto;        /* keep full height/right attach */
+    z-index: 1;               /* sits below the overlay .close */
+    overflow:auto;
+  }
+  .panel .panel-close {
+    position: sticky;
+    top: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-left: auto;
+    margin-bottom: .75rem;
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:999px;
+    padding:.35rem .7rem;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .panel .panel-close:active{ transform: translateY(1px); }
+}
+
 
 </style>
 </head>
@@ -270,6 +299,9 @@ main{ text-align:center; padding:0 16px; }
   </div>
 
   <!-- ===== Experience ===== -->
+  
+  
+  
   <div id="experience" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="exp-title">
     <button class="close" aria-label="Close">&times;</button>
     <div class="panel">
@@ -285,6 +317,9 @@ main{ text-align:center; padding:0 16px; }
     </div>
   </div>
 
+
+
+
   <!-- ===== Projects ===== -->
   <div id="projects" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="proj-title">
     <div class="overlay-content">
@@ -295,7 +330,7 @@ main{ text-align:center; padding:0 16px; }
   <li><button class="proj-btn" disabled><strong>ISL Voice Assistant</strong></button> — Campus navigation prototype (removed from site).</li>
 </ul>
 
-  <p class="pop-note">Hover the underlined project titles to preview.</p>
+  <p class="pop-note">Hover the underlined project titles to preview the concept.</p>
 </div>
 
 </div>
@@ -471,24 +506,57 @@ main{ text-align:center; padding:0 16px; }
   </dialog>
 
 <script>
-/* ===== Overlay open/close ===== */
-(function(){
-  const buttons=document.querySelectorAll("[data-overlay]");
-  const overlays=document.querySelectorAll(".overlay");
+/* ===== Overlay open/close (tap outside to close) ===== */
+(function () {
+  const buttons = document.querySelectorAll("[data-overlay]");
+  const overlays = document.querySelectorAll(".overlay");
+
+  function openOverlay(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.add("active");
+    document.body.style.overflow = "hidden";   // lock background scroll
+  }
+
+  function closeOverlay(el){
+    if(!el) return;
+    el.classList.remove("active");
+    document.body.style.overflow = "";         // restore scroll
+  }
+
+  // open via nav buttons
   buttons.forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const el=document.getElementById(btn.dataset.overlay);
-      if(el) el.classList.add("active");
-    });
+    btn.addEventListener("click", ()=> openOverlay(btn.dataset.overlay));
   });
+
+  // close logic
   overlays.forEach(o=>{
-    const closeBtn=o.querySelector(".close");
-    if(closeBtn) closeBtn.addEventListener("click",()=>o.classList.remove("active"));
-    o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("active"); });
-    document.addEventListener("keydown",e=>{ if(e.key==="Escape") o.classList.remove("active"); });
+    const closeBtn = o.querySelector(".close");
+    if(closeBtn) closeBtn.addEventListener("click", ()=> closeOverlay(o));
+
+    // click/tap outside content closes (works for both fade-blur and slide)
+    o.addEventListener("click", (e)=>{
+      const panel   = o.querySelector(".panel");             // slide overlays
+      const content = o.querySelector(".overlay-content");   // fade-blur overlays
+
+      // if a slide overlay: close when click is OUTSIDE the panel
+      if (panel && !panel.contains(e.target)) { closeOverlay(o); return; }
+
+      // if a fade-blur overlay: close when click is OUTSIDE the centered content
+      if (!panel && content && !content.contains(e.target)) { closeOverlay(o); return; }
+
+      // if neither panel nor content captured it, clicking the blank backdrop also closes
+      if (e.target === o) { closeOverlay(o); }
+    });
+
+    // ESC to close
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape") closeOverlay(o);
+    });
   });
 })();
 </script>
+
 
 <script>
 /* ===== Merge popover (hover) ===== */
