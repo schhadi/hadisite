@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hadi Scharbrodt</title>
+
+
+<style>
+ /* ——— Stefan Fisk header ——— */
+/* --- Center entire header block in middle of page --- */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* vertical centering */
+  height: 100vh;
+  margin: 0;
+  background: #fff;
+  color: #000;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+
+h1{
+  font-size:20px;                        /* smaller, classic */
+  font-weight:700;                       /* strong */
+  letter-spacing:-0.2px;
+  margin:0 0 .35rem 0;                   /* tight stack */
+  text-align:center;
+  color:#000;
+}
+
+.meta{
+  text-align:center;
+  font-size:14px;
+  line-height:1.35;                      /* tighter */
+  color:#000;                            /* not grey */
+  margin-top:0;                          /* no extra gap */
+}
+
+.meta a,
+.meta a:visited{
+  color:inherit;                         /* same black */
+  text-decoration:none;                  /* no blue underline */
+}
+.meta a:hover{ text-decoration:underline; }
+
+.nav{
+  margin-top:1.4rem;                     /* small gap below contacts */
+  display:flex; gap:1rem; justify-content:center;
+  font-size:14px; color:#666;
+}
+.nav button{
+  background:none; border:none; font:inherit; color:inherit; cursor:pointer;
+}
+.nav button:hover{ color:#000; text-decoration:none; }  /* keep clean, no underline */
+
+
+  /* Email color = text color */
+  .meta a,.meta a:visited{color:inherit;text-decoration:none}
+  .meta a:hover{text-decoration:underline}
+
+  /* ===== Overlays (title stays centered) ===== */
+  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+           opacity:0;pointer-events:none}
+  .overlay.active{opacity:1;pointer-events:auto}
+  .close{position:absolute;top:2rem;right:2rem;font-size:20px;background:none;border:0;cursor:pointer;color:#666}
+  .close:hover{color:#000}
+
+  /* Fade + blur */
+  .fade-blur{background:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:opacity .28s ease}
+  .fade-blur .overlay-content{max-width:36rem;text-align:center;font-size:15px;color:#333;line-height:1.55;
+                              padding:1rem 2rem;transform:translateY(6px);opacity:0;transition:opacity .28s ease,transform .28s ease}
+  .fade-blur.active .overlay-content{opacity:1;transform:none}
+
+  /* Slide-in panel (right) */
+  .slide{background:transparent;transition:opacity .2s ease}
+  .slide .panel{position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);
+    background:#fff;border-left:1px solid #eee;box-shadow:0 0 40px rgba(0,0,0,.06);
+    transform:translateX(100%);transition:transform .35s ease;
+    display:flex;align-items:center;justify-content:center;padding:2rem}
+  .slide.active .panel{transform:none}
+  .overlay-content{max-width:34rem;font-size:15px;color:#333;line-height:1.6}
+  h2{margin-top:0;font-size:18px;font-weight:600}
+  p{margin:.5rem 0}
+
+  /* No bullets anywhere */
+  ul{list-style:none;padding-left:0;margin:.5rem 0}
+  li{margin:.35rem 0}
+
+  /* ===== Merge popover (hover) ===== */
+  .popover{
+    position:fixed;top:0;left:0;transform:translate(-9999px,-9999px);
+    background:#fff;border:1px solid #eee;box-shadow:0 8px 30px rgba(0,0,0,.08);
+    padding:.75rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:1000;
+  }
+  .popover.show{opacity:1}
+  .proj-list{list-style:none;padding-left:0;margin:.5rem 0}
+  .proj-btn {
+  all: unset;
+  cursor: pointer;
+  color: inherit;
+  font-weight: 600;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  }
+  .proj-btn:hover {
+    opacity: 0.6;
+  }
+
+  .pop-note{font-size:12px;color:#666;margin-top:.4rem;text-align:center}
+  canvas{display:block;width:240px;height:120px}
+
+  /* ===== Quiz modal (animated, minimalist) ===== */
+  dialog#quizDialog{
+    border:none;border-radius:12px;padding:0;overflow:hidden;
+    box-shadow:0 18px 48px rgba(0,0,0,.10);width:min(720px,92vw);
+    opacity:0;transform:translateY(8px) scale(.98);
+    transition:opacity .25s ease, transform .25s ease;will-change:opacity,transform;
+  }
+  dialog#quizDialog.is-open{opacity:1;transform:none}
+  dialog::backdrop{background:rgba(0,0,0,.18);backdrop-filter:blur(0px);transition:background .25s ease,backdrop-filter .25s ease}
+  dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
+  .qd-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;border-bottom:1px solid #eee;background:#fff}
+  .qd-title{font-size:16px;font-weight:600}
+  .qd-close{all:unset;cursor:pointer;padding:.25rem .5rem;color:#666}
+  .qd-close:hover{color:#000}
+  .qd-body{height:min(70vh,520px);background:#fff}
+  .qd-body iframe{display:block;width:100%;height:100%;border:0}
+/* Light Card */
+  .card{
+    background:var(--card-bg);
+    border:1px solid var(--card-br);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+  }
+
+  /* Simple grid for cards */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+    gap:12px;
+  }
+
+  /* Small caption */
+  .caption{color:var(--muted);font-size:12px}
+
+  /* Make overlay content look carded without heavy chrome */
+  .overlay .overlay-content.carded{
+    padding:1rem 1.25rem;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fff;
+    box-shadow:var(--shadow);
+  }
+
+  /* Smaller screens: stack nav, soften sizes */
+  @media (max-width: 560px){
+    h1{font-size:20px}
+    .nav{flex-wrap:wrap;gap:.5rem}
+    .grid{grid-template-columns:1fr}
+    .slide .panel{width:100%}
+    .fade-blur .overlay-content{padding:.75rem 1rem}
+    dialog#quizDialog{width:min(96vw,720px)}
+    .qd-head{padding:.7rem .9rem}
+    .qd-body{height:min(70vh,480px)}
+  }
+
+  /* Very small / short screens: let dialog go taller and be easy to dismiss */
+  @media (max-height: 560px){
+    dialog#quizDialog .qd-body{height:60vh}
+  }
+
+  /* Accessibility: reduce motion */
+  @media (prefers-reduced-motion: reduce){
+    .fade-blur,.slide,dialog#quizDialog{transition:none}
+    .fade-blur .overlay-content,.slide .panel{transition:none}
+  }
+
+
+</style>
+</head>
+<body>
+  <main>
+  <h1>Hadi Paul Scharbrodt</h1>
+  <div class="meta">
+    <div><a href="mailto:h.scharbrodt@gmail.com">h.scharbrodt@gmail.com</a></div>
+    <div>+46 760 312 007</div>
+  </div>
+  <div class="nav">
+    <button data-overlay="about">About</button>
+    <button data-overlay="experience">Experience</button>
+    <button data-overlay="projects">Projects</button>
+    <button data-overlay="activities">Activities</button>
+  </div>
+</main>
+
+
+  <!-- ===== About ===== -->
+  <div id="about" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button class="close" aria-label="Close">&times;</button>
+    <div class="overlay-content">
+      <h2 id="about-title">About</h2>
+      <p>Computer science & business professional with global experience in software
+         development, project leadership, and cross-cultural teamwork. Skilled in Python,
+         React, and Next.js, and passionate about building impactful digital tools. Ex-founder
+         of an educational platform and organiser of large-scale student initiatives.</p>
+    </div>
+  </div>
+
+  <!-- ===== Experience ===== -->
+  <div id="experience" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="exp-title">
+    <button class="close" aria-label="Close">&times;</button>
+    <div class="panel">
+      <div class="overlay-content">
+        <h2 id="exp-title">Experience</h2>
+        <ul>
+          <li><strong>Intern – Al Nayzak Organisation, Jerusalem (2025–Present)</strong><br>
+              Co-developed <em>Horizons Academy</em> & <em>Pali-Swiss Hub</em> (Next.js) for 1,000+ users; built automation tools cutting recruiter screening time by ~40%.</li>
+          <li><strong>Founder & Tutor – MyMateTeaches, Lund (2024–25)</strong><br>
+              Instagram-based tutoring reaching 20+ IB & SNP students weekly; average grade gains ~4 points.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Projects ===== -->
+  <div id="projects" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="proj-title">
+    <div class="overlay-content">
+  <h2 id="proj-title">Projects</h2>
+  <ul class="proj-list">
+  <li><button class="proj-btn" data-pop="merge">Sorting Algorithm Analyzer</button> — Benchmarked Merge, Bubble & Radix Sort in Python.</li>
+  <li><button id="openQuiz" class="proj-btn">IB Psychology Quiz App</button> — Minimal SAQ trainer for IB psychology.</li>
+  <li><button class="proj-btn" disabled><strong>ISL Voice Assistant</strong></button> — Campus navigation prototype (removed from site).</li>
+</ul>
+
+  <p class="pop-note">Hover the underlined project titles to preview.</p>
+</div>
+
+</div>
+
+  </div>
+
+  <!-- ===== Activities ===== -->
+  <div id="activities" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="act-title">
+    <button class="close" aria-label="Close">&times;</button>
+    <div class="panel">
+      <div class="overlay-content">
+        <h2 id="act-title">Activities & Volunteering</h2>
+        <ul>
+          <li><strong>Shatila Community Centre, Beirut (2025)</strong> — Youth English workshops & cultural activities.</li>
+          <li><strong>European Youth Week (2024)</strong> — Represented Sweden at EU workshops on sustainability & digital innovation.</li>
+          <li><strong>Model UN Malmö (2024)</strong> — Delegate for France on gender equality.</li>
+          <li><strong>GoPalestine Camp (2023)</strong> — Sustainable farming support & art-therapy for hospitalised children.</li>
+          <li><strong>Founder – IB Volleyball Tournament Sweden (2022)</strong> — 200+ students, 4 schools.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Merge popover (hover) ===== -->
+  <div id="pop-merge" class="popover" aria-hidden="true">
+    <canvas id="mergeCanvas" width="240" height="120" aria-label="Merge sort visual"></canvas>
+  </div>
+
+  <!-- ===== Quiz modal (animated) ===== -->
+  <dialog id="quizDialog" aria-labelledby="qd-title">
+    <div class="qd-head">
+      <div class="qd-title" id="qd-title">IB Psychology — SAQ Trainer</div>
+      <button class="qd-close" aria-label="Close">✕</button>
+    </div>
+    <div class="qd-body">
+      <iframe id="quizFrame" title="IB Psychology SAQ" sandbox="allow-scripts" referrerpolicy="no-referrer" srcdoc='
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --muted:#6a6a6a;
+    --line:#eaeaea;
+  }
+  body {
+    margin:0;
+    font-family:Georgia,serif;
+    background:#fff;
+    color:#111;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .wrap {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:28px 32px;
+    border-radius:12px;
+    max-width:640px;
+    width:90%;
+    box-shadow:0 6px 32px rgba(0,0,0,.06);
+    border:1px solid var(--line);
+  }
+  h3 {
+    margin:0 0 8px;
+    font-size:18px;
+    font-weight:700;
+  }
+  .hint {
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:12px;
+  }
+  hr {
+    border:0;
+    border-top:1px solid var(--line);
+    width:100%;
+    margin:10px 0 14px;
+  }
+  #q {
+    line-height:1.6;
+    margin:0 0 14px;
+    font-size:15px;
+  }
+  .meta-block {
+    color:var(--muted);
+    font-size:14px;
+    background:#fafafa;
+    border:1px solid var(--line);
+    padding:10px 12px;
+    border-radius:8px;
+    margin:0 0 16px;
+    width:100%;
+    text-align:left;
+  }
+  .row {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+  }
+  button {
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:14px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  button:hover {
+    border-color:#aaa;
+    transform:translateY(-1px);
+  }
+  .score {
+    margin-top:12px;
+    font-weight:700;
+    color:#111;
+  }
+</style>
+
+</head>
+<body>
+  <div class="wrap">
+
+    <p id="q"></p>
+    <div id="info"></div>
+    <div class="actions">
+      <button data-a="next">Next</button>
+      <button data-a="study">Study</button>
+      <button data-a="concepts">Concepts</button>
+      
+    </div>
+  </div>
+<script>
+  const data=[
+    {"question":"Explain one technique used to study the brain in relation to behavior","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"MRI — what it is and how it works; Present and explain Maguire; Conclude"},
+    {"question":"Outline localization of brain function using one relevant piece of research.","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"Theory of localization (structural and functional); Present Maguire; Conclude"},
+    {"question":"Explain neuroplasticity using one relevant piece of research.","study":"Maguire et al. (2000) / Luby et al.","concepts":"Define neuroplasticity; Environment influences structure/function; Present Luby; Conclude"},
+    {"question":"Describe neurotransmission using one relevant study.","study":"Fisher, Aron and Brown (2005) – Dopamine and Attraction","concepts":"Define neurotransmitters and process; Dopamine and attraction; Present study; Conclude"},
+    {"question":"Describe synaptic pruning using one relevant study.","study":"Luby et al. (2013) – Preschool Depression","concepts":"Neuroplasticity and neural circuits; Environment and stressors; Present Luby; Less grey matter with pruning"},
+    {"question":"Explain one inhibitory neurotransmitter’s effect on behavior.","study":"Crockett et al. (2010) – Trolley Problem","concepts":"Excitatory vs inhibitory; Serotonin and prosocial behavior; Present study"},
+    {"question":"Explain one excitatory neurotransmitter’s effect on behavior.","study":"Fisher, Aron and Brown (2005) – Dopamine and Attraction","concepts":"Excitatory vs inhibitory; Dopamine and attachment; Present study"},
+    {"question":"Explain neural networks with one study.","study":"Luby et al. (2013) (or Fisher / Maguire)","concepts":"Neural networks and transmission; dopamine / plasticity / pruning; Present study"},
+    {"question":"Explain the impact of agonists on behavior with one study.","study":"Davis et al. (1978) – Physostigmine (agonist)","concepts":"Agonists and antagonists; Physostigmine and memory; Present study; Conclude"},
+    {"question":"Explain the impact of antagonists on behavior with one study.","study":"Antonova et al. (2011) – Scopolamine (antagonist)","concepts":"Neurotransmission; Antagonists and memory; Present study; Conclude"},
+    {"question":"Describe one research method for brain–behavior with a study.","study":"Maguire et al. (2000)","concepts":"Experiments and quasi-experiments; scope includes hormones/pheromones/genes; Present Maguire"},
+    {"question":"Outline effects of hormones on behavior.","study":"Schneiderman et al. (2012) – Oxytocin (early attachment)","concepts":"What hormones are and how they act; Oxytocin and attachment; Present study"},
+    {"question":"Explain effects of pheromones on behavior.","study":"Saxton et al. (2008) – Androstadienone and attractiveness","concepts":"Define pheromones (sex pheromones); Androstadienone and attraction; Present study"},
+    {"question":"Describe how genetic inheritance influences behavior.","study":"Rushton and Bons (2005) – Similarity on a Genetic Level","concepts":"Genetics vs environment; Twin/family logic; Present study"},
+    {"question":"Explain how a particular gene can influence behavior.","study":"Sadikaj, Moskowitz and Bartz (CD38 / attachment)","concepts":"Molecular genetics methods; CD38 and attraction; Present study"},
+    {"question":"Explain one evolutionary explanation for behavior.","study":"Wedekind (1995)","concepts":"Natural selection and evolutionary psychology; Biological origins of attraction; Present study; Conclude"},
+    {"question":"Outline one ethical consideration in the biological approach.","study":"Crockett / drug infusion studies","concepts":"Protection from harm; physostigmine / citalopram / scopolamine; Evaluate and conclude"},
+    {"question":"Explain how one research method is used in the biological approach.","study":"Maguire et al.","concepts":"Experiments vs quasi; Present study; Conclude"}
+  ];
+  let i=-1,score=0;
+  const q=document.getElementById("q"),info=document.getElementById("info"),sc=document.getElementById("score");
+  function next(){i++;info.style.display="none";info.textContent="";q.textContent=(i>=data.length)?"Quiz completed!":data[i].question;}
+  function reveal(t){if(i<0||i>=data.length)return;info.style.display="block";info.textContent=(t==="study")?("Study: "+data[i].study):("Concepts: "+data[i].concepts);}
+  function mark(ok){if(ok){score++;sc.textContent="Score: "+score;}}
+  document.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{const a=b.dataset.a;if(a==="next")next();else if(a==="study")reveal("study");else if(a==="concepts")reveal("concepts");else if(a==="y")mark(true);else if(a==="n")mark(false);}));
+  addEventListener("keydown",e=>{if(e.key==="n"||e.key==="N")next();if(e.key==="s"||e.key==="S")reveal("study");if(e.key==="c"||e.key==="C")reveal("concepts");if(e.key==="y"||e.key==="Y")mark(true);if(e.key==="m"||e.key==="M")mark(false);});
+  next();
+</script>
+</body>
+</html>'></iframe>
+    </div>
+  </dialog>
+
+<script>
+/* ===== Overlay open/close ===== */
+(function(){
+  const buttons=document.querySelectorAll("[data-overlay]");
+  const overlays=document.querySelectorAll(".overlay");
+  buttons.forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const el=document.getElementById(btn.dataset.overlay);
+      if(el) el.classList.add("active");
+    });
+  });
+  overlays.forEach(o=>{
+    const closeBtn=o.querySelector(".close");
+    if(closeBtn) closeBtn.addEventListener("click",()=>o.classList.remove("active"));
+    o.addEventListener("click",e=>{ if(e.target===o) o.classList.remove("active"); });
+    document.addEventListener("keydown",e=>{ if(e.key==="Escape") o.classList.remove("active"); });
+  });
+})();
+</script>
+
+<script>
+/* ===== Merge popover (hover) ===== */
+(function(){
+  const trigger=document.querySelector('[data-pop="merge"]');
+  const pop=document.getElementById('pop-merge');
+  let timer=null, follow=null, active=false;
+
+  function position(e){
+    if(!active) return;
+    const pad=14, x=(e.clientX||0)+pad, y=(e.clientY||0)+pad;
+    const r=pop.getBoundingClientRect(), vw=innerWidth, vh=innerHeight;
+    pop.style.transform=`translate(${(x+r.width>vw-8?x-r.width-pad*2:x)}px,${(y+r.height>vh-8?y-r.height-pad*2:y)}px)`;
+  }
+  function show(e){
+    clearTimeout(timer); pop.classList.add('show'); pop.style.pointerEvents='auto';
+    active=true; position(e); follow=ev=>position(ev);
+    document.addEventListener('mousemove',follow,{passive:true}); startMergeAnim();
+  }
+  function hide(){
+    clearTimeout(timer); timer=setTimeout(()=>{ pop.classList.remove('show'); pop.style.pointerEvents='none';
+      active=false; if(follow) document.removeEventListener('mousemove',follow); stopMergeAnim(); },120);
+  }
+  if(trigger){ trigger.addEventListener('mouseenter',show); trigger.addEventListener('mouseleave',hide);
+    pop.addEventListener('mouseenter',()=>clearTimeout(timer)); pop.addEventListener('mouseleave',hide); }
+
+  /* tiny merge anim */
+  const canvas=document.getElementById('mergeCanvas'); const ctx=canvas&&canvas.getContext?canvas.getContext('2d'):null;
+  let frames=[],idx=0, anim=null;
+  function makeData(n=28){const a=Array.from({length:n},(_,i)=>i+1);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function record(arr,hl=[]){frames.push({arr:arr.slice(),hl:hl.slice()});}
+  function mergeSort(arr,l=0,r=arr.length){if(r-l<=1)return arr.slice(l,r);const m=Math.floor((l+r)/2),L=mergeSort(arr,l,m),R=mergeSort(arr,m,r);const M=[];let i=0,j=0;
+    while(i<L.length||j<R.length){const t=j>=R.length||(i<L.length&&L[i]<=R[j]);M.push(t?L[i++]:R[j++]);const cur=arr.slice(0,l).concat(M).concat(L.slice(i)).concat(R.slice(j)).concat(arr.slice(r));record(cur,[l,r]);}
+    for(let k=0;k<M.length;k++){arr[l+k]=M[k];record(arr,[l,r]);}return arr.slice(l,r);}
+  function draw({arr,hl}){if(!ctx)return;ctx.clearRect(0,0,canvas.width,canvas.height);const w=canvas.width,h=canvas.height,n=arr.length,bw=w/n,max=Math.max(...arr);
+    for(let i=0;i<n;i++){const val=arr[i],bh=(val/max)*(h-6),x=i*bw,y=h-bh;ctx.globalAlpha=(hl&&i>=hl[0]&&i<hl[1])?0.9:0.6;ctx.fillRect(x+0.5,y,bw-1,bh);}ctx.globalAlpha=1;}
+  function startMergeAnim(){if(!ctx)return;frames=[];idx=0;const base=makeData(28);record(base);mergeSort(base.slice());if(anim)cancelAnimationFrame(anim);
+    let last=0;function step(ts){if(ts-last>55){draw(frames[idx]);idx=(idx+1)%frames.length;last=ts;}anim=requestAnimationFrame(step);}anim=requestAnimationFrame(step);}
+  function stopMergeAnim(){if(anim){cancelAnimationFrame(anim);anim=null;}}
+})();
+</script>
+
+<script>
+/* ===== Quiz dialog open/close with animation ===== */
+(function(){
+  const btn=document.getElementById('openQuiz');
+  const dlg=document.getElementById('quizDialog');
+  const close=dlg.querySelector('.qd-close');
+
+  function openModal(){
+    if(typeof dlg.showModal==='function'){dlg.showModal();}else{dlg.setAttribute('open','');}
+    requestAnimationFrame(()=>dlg.classList.add('is-open'));
+  }
+  function closeModal(){
+    dlg.classList.remove('is-open');
+    const done=()=>{dlg.close?dlg.close():dlg.removeAttribute('open');dlg.removeEventListener('transitionend',done);};
+    dlg.addEventListener('transitionend',done,{once:true});
+  }
+  btn.addEventListener('click',openModal);
+  close.addEventListener('click',closeModal);
+  dlg.addEventListener('cancel',e=>{e.preventDefault();closeModal();}); // ESC
+  // backdrop click to close
+  dlg.addEventListener('click',(e)=>{
+    const r=dlg.getBoundingClientRect();
+    const outside = e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;
+    if(outside) closeModal();
+  });
+})();
+</script>
+
+</body>
+</html>
