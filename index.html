@@ -4,628 +4,418 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Hadi Scharbrodt</title>
-
-
 <style>
- /* ——— Stefan Fisk header ——— */
-/* --- Center entire header block in middle of page --- */
-/* center the header stack on all screens */
-body{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;          /* vertical centering */
-  height:100svh;                   /* mobile-safe viewport unit */
-  min-height:100svh;
-  margin:0;
-  background:#fff;
-  color:#000;
-  font-family:Georgia,"Times New Roman",serif;
-  overflow-x:hidden;               /* prevent sideways scroll on mobile */
-}
+:root{--ink:#000;--muted:#666;--line:#eee}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#fff;color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+body{display:flex;align-items:center;justify-content:center;overflow-x:hidden}
+main{text-align:center;padding:0 16px}
 
-/* keep the header block readable edge-to-edge on narrow phones */
-main{ text-align:center; padding:0 16px; }
+/* Header */
+h1{margin:0 0 .35rem;font-size:30px;font-weight:700;letter-spacing:-.2px}
+.meta{margin:0;font-size:18px;line-height:1.35}
+.meta a,.meta a:visited{color:inherit;text-decoration:none}
+.meta a:hover{text-decoration:underline}
 
-/* mobile tweaks */
-@media (max-width:560px){
-  h1{ font-size: clamp(22px, 6.2vw, 30px); }   /* fluid, never huge */
-  .meta{ font-size: clamp(14px, 3.8vw, 18px); }
-  .nav{
-    flex-wrap:wrap;
-    gap:.6rem 1rem;
-    font-size: clamp(13px, 3.6vw, 16px);
-  }
-  .nav button{ padding:8px 10px; -webkit-tap-highlight-color:transparent; }
-  dialog#quizDialog{ width:96vw; border-radius:10px; }
-  .qd-body{ height:70svh; }
-  .slide .panel{ width:100vw; padding:1.25rem; box-shadow:none; border-left:0; border-top:1px solid var(--line); }
-  .fade-blur .overlay-content{ padding:.9rem 1rem; margin:0 10px; }
-}
-
-
-
-
-h1{
-  font-size:30px;                        /* smaller, classic */
-  font-weight:700;                       /* strong */
-  letter-spacing:-0.2px;
-  margin:0 0 .35rem 0;                   /* tight stack */
-  text-align:center;
-  color:#000;
-}
-
-.meta{
-  text-align:center;
-  font-size:18px;
-  line-height:1.35;                      /* tighter */
-  color:#000;                            /* not grey */
-  margin-top:0;                          /* no extra gap */
-}
-
-.meta a,
-.meta a:visited{
-  color:inherit;                         /* same black */
-  text-decoration:none;                  /* no blue underline */
-}
-.meta a:hover{ text-decoration:underline; }
-
+/* Nav reveal after intro */
 .nav{
-  margin-top:1.4rem;                     /* small gap below contacts */
-  display:flex; gap:1rem; justify-content:center;
-  font-size:16px; color:#666;
+  margin-top:1.2rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;
+  color:#666; font-size:16px; opacity:0; transform:translateY(-10px);
+  pointer-events:none; transition:opacity .45s ease, transform .45s ease;
 }
-.nav button{
-  background:none; border:none; font:inherit; color:inherit; cursor:pointer;
+.nav button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;opacity:0;transform:translateY(-6px);transition:opacity .45s ease,transform .45s ease}
+.nav button:hover{color:#000}
+body.ready .nav{opacity:1;transform:none;pointer-events:auto}
+body.ready .nav button{opacity:1;transform:none}
+body.ready .nav button:nth-child(1){transition-delay:.05s}
+body.ready .nav button:nth-child(2){transition-delay:.12s}
+body.ready .nav button:nth-child(3){transition-delay:.19s}
+body.ready .nav button:nth-child(4){transition-delay:.26s}
+
+/* Intro: line only */
+#intro{position:fixed;inset:0;background:#fff;display:grid;place-items:center;z-index:9999;transition:opacity .5s ease}
+#intro.done{opacity:0;pointer-events:none}
+.intro-rule{width:0;height:1px;background:#000;animation:introLine .9s ease-out forwards .2s}
+@keyframes introLine{to{width:80px}}
+@media (prefers-reduced-motion:reduce){#intro{transition:none}.intro-rule{animation:none;width:80px}}
+
+/* Overlays */
+.overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
+.overlay.active{opacity:1;pointer-events:auto}
+.close{position:absolute;top:2rem;right:2rem;background:none;border:0;cursor:pointer;color:#666;font-size:20px}
+.close:hover{color:#000}
+.fade-blur{background:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:opacity .25s ease}
+.fade-blur .overlay-content{max-width:36rem;padding:1rem 2rem;text-align:center;color:#333;line-height:1.55;transform:translateY(6px);opacity:0;transition:opacity .25s ease,transform .25s ease}
+.fade-blur.active .overlay-content{opacity:1;transform:none}
+.slide{background:transparent;transition:opacity .2s ease}
+.slide .panel{position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);background:#fff;border-left:1px solid var(--line);box-shadow:0 0 40px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;padding:2rem;transform:translateX(100%);transition:transform .35s ease}
+.slide.active .panel{transform:none}
+
+.overlay-content{max-width:34rem;font-size:15px;color:#333}
+h2{margin:0 0 .5rem;font-size:18px;font-weight:700}
+p{margin:.5rem 0}
+ul{list-style:none;margin:.5rem 0;padding:0}
+li{margin:.35rem 0}
+
+/* Quiz dialog */
+#quizDialog{border:0;border-radius:12px;padding:0;overflow:hidden;width:min(720px,92vw);box-shadow:0 18px 48px rgba(0,0,0,.1);opacity:0;transform:translateY(8px) scale(.98);transition:opacity .25s ease,transform .25s ease}
+#quizDialog.is-open{opacity:1;transform:none}
+dialog::backdrop{background:rgba(0,0,0,.18);backdrop-filter:blur(0px);transition:background .25s ease,backdrop-filter .25s ease}
+dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
+.qd-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;border-bottom:1px solid var(--line)}
+.qd-title{font-weight:700;font-size:16px}
+.qd-close{all:unset;cursor:pointer;color:#666;padding:.25rem .5rem}
+.qd-close:hover{color:#000}
+.qd-body{height:min(70vh,520px)}
+.qd-body iframe{display:block;width:100%;height:100%;border:0}
+
+/* Sort popover (for Sorting Algorithm Analyzer) */
+.popover{
+  position:fixed; top:0; left:0; transform:translate(-9999px,-9999px);
+  background:#fff; border:1px solid var(--line); border-radius:10px; padding:.6rem;
+  box-shadow:0 8px 30px rgba(0,0,0,.08); z-index:1000; opacity:0; pointer-events:none; transition:opacity .15s ease;
 }
-.nav button:hover{ color:#000; text-decoration:none; }  /* keep clean, no underline */
+.popover.show{opacity:1}
+.popover canvas{display:block;width:240px;height:120px}
 
-
-  /* Email color = text color */
-  .meta a,.meta a:visited{color:inherit;text-decoration:none}
-  .meta a:hover{text-decoration:underline}
-
-  /* ===== Overlays (title stays centered) ===== */
-  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-           opacity:0;pointer-events:none}
-  .overlay.active{opacity:1;pointer-events:auto}
-  .close{position:absolute;top:2rem;right:2rem;font-size:20px;background:none;border:0;cursor:pointer;color:#666}
-  .close:hover{color:#000}
-
-  /* Fade + blur */
-  .fade-blur{background:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:opacity .28s ease}
-  .fade-blur .overlay-content{max-width:36rem;text-align:center;font-size:15px;color:#333;line-height:1.55;
-                              padding:1rem 2rem;transform:translateY(6px);opacity:0;transition:opacity .28s ease,transform .28s ease}
-  .fade-blur.active .overlay-content{opacity:1;transform:none}
-
-  /* Slide-in panel (right) */
-  .slide{background:transparent;transition:opacity .2s ease}
-  .slide .panel{position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);
-    background:#fff;border-left:1px solid #eee;box-shadow:0 0 40px rgba(0,0,0,.06);
-    transform:translateX(100%);transition:transform .35s ease;
-    display:flex;align-items:center;justify-content:center;padding:2rem}
-  .slide.active .panel{transform:none}
-  .overlay-content{max-width:34rem;font-size:15px;color:#333;line-height:1.6}
-  h2{margin-top:0;font-size:18px;font-weight:600}
-  p{margin:.5rem 0}
-
-  /* No bullets anywhere */
-  ul{list-style:none;padding-left:0;margin:.5rem 0}
-  li{margin:.35rem 0}
-
-  /* ===== Merge popover (hover) ===== */
-  .popover{
-    position:fixed;top:0;left:0;transform:translate(-9999px,-9999px);
-    background:#fff;border:1px solid #eee;box-shadow:0 8px 30px rgba(0,0,0,.08);
-    padding:.75rem;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .15s ease;z-index:1000;
-  }
-  .popover.show{opacity:1}
-  .proj-list{list-style:none;padding-left:0;margin:.5rem 0}
-  .proj-btn {
-  all: unset;
-  cursor: pointer;
-  color: inherit;
-  font-weight: 600;
-  transition: color 0.2s ease, opacity 0.2s ease;
-  }
-  .proj-btn:hover {
-    opacity: 0.6;
-  }
-
-  .pop-note{font-size:12px;color:#666;margin-top:.4rem;text-align:center}
-  canvas{display:block;width:240px;height:120px}
-
-  /* ===== Quiz modal (animated, minimalist) ===== */
-  dialog#quizDialog{
-    border:none;border-radius:12px;padding:0;overflow:hidden;
-    box-shadow:0 18px 48px rgba(0,0,0,.10);width:min(720px,92vw);
-    opacity:0;transform:translateY(8px) scale(.98);
-    transition:opacity .25s ease, transform .25s ease;will-change:opacity,transform;
-  }
-  dialog#quizDialog.is-open{opacity:1;transform:none}
-  dialog::backdrop{background:rgba(0,0,0,.18);backdrop-filter:blur(0px);transition:background .25s ease,backdrop-filter .25s ease}
-  dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
-  .qd-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;border-bottom:1px solid #eee;background:#fff}
-  .qd-title{font-size:16px;font-weight:600}
-  .qd-close{all:unset;cursor:pointer;padding:.25rem .5rem;color:#666}
-  .qd-close:hover{color:#000}
-  .qd-body{height:min(70vh,520px);background:#fff}
-  .qd-body iframe{display:block;width:100%;height:100%;border:0}
-/* Light Card */
-  .card{
-    background:var(--card-bg);
-    border:1px solid var(--card-br);
-    border-radius:12px;
-    box-shadow:var(--shadow);
-  }
-
-  /* Simple grid for cards */
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(220px,1fr));
-    gap:12px;
-  }
-
-  /* Small caption */
-  .caption{color:var(--muted);font-size:12px}
-
-  /* Make overlay content look carded without heavy chrome */
-  .overlay .overlay-content.carded{
-    padding:1rem 1.25rem;
-    border:1px solid var(--line);
-    border-radius:12px;
-    background:#fff;
-    box-shadow:var(--shadow);
-  }
-
-  /* Smaller screens: stack nav, soften sizes */
-  @media (max-width: 560px){
-    h1{font-size:20px}
-    .nav{flex-wrap:wrap;gap:.5rem}
-    .grid{grid-template-columns:1fr}
-    .slide .panel{width:100%}
-    .fade-blur .overlay-content{padding:.75rem 1rem}
-    dialog#quizDialog{width:min(96vw,720px)}
-    .qd-head{padding:.7rem .9rem}
-    .qd-body{height:min(70vh,480px)}
-  }
-
-  /* Very small / short screens: let dialog go taller and be easy to dismiss */
-  @media (max-height: 560px){
-    dialog#quizDialog .qd-body{height:60vh}
-  }
-
-  /* Accessibility: reduce motion */
-  @media (prefers-reduced-motion: reduce){
-    .fade-blur,.slide,dialog#quizDialog{transition:none}
-    .fade-blur .overlay-content,.slide .panel{transition:none}
-  }
-/* --- HARDENED CENTERING + MOBILE SAFE --- */
-*,*::before,*::after{ box-sizing:border-box; }
-
-html{
-  margin:0; padding:0;
-  height:100svh;          /* small viewport unit = correct on mobile */
-}
-
-body{
-  min-height:100svh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center; /* vertical + horizontal center */
-  margin:0;
-  background:#fff;
-  color:#000;
-  font-family:Georgia,"Times New Roman",serif;
-  overflow-x:hidden;      /* kill sideways scroll in emulators */
-}
-
-/* keep header readable edge-to-edge on tiny screens */
-main{ text-align:center; padding:0 16px; }
-
-/* nav wraps & remains tappable on phones */
+/* Responsive */
 @media (max-width:560px){
-  h1{ font-size: clamp(22px, 6.2vw, 30px); }
-  .meta{ font-size: clamp(14px, 3.8vw, 18px); }
-  .nav{
-    flex-wrap:wrap;
-    gap:.6rem 1rem;
-    font-size: clamp(13px, 3.6vw, 16px);
-  }
-  .nav button{ padding:8px 10px; -webkit-tap-highlight-color:transparent; }
-  dialog#quizDialog{ width:96vw; border-radius:10px; }
-  .qd-body{ height:70svh; }
-  .slide .panel{ width:100vw; padding:1.25rem; box-shadow:none; border-left:0; border-top:1px solid var(--line); }
-  .fade-blur .overlay-content{ padding:.9rem 1rem; margin:0 10px; }
+  h1{font-size:clamp(22px,6.2vw,30px)}
+  .meta{font-size:clamp(14px,3.8vw,18px)}
+  .nav{gap:.6rem 1rem;font-size:clamp(13px,3.6vw,16px)}
+  .slide .panel{width:100vw;padding:1.25rem;border-left:0;border-top:1px solid var(--line);box-shadow:none}
+  .fade-blur .overlay-content{padding:.9rem 1rem;margin:0 10px}
+  #quizDialog{width:96vw;border-radius:10px}
+  .qd-body{height:70svh}
 }
 
-/* Ensure the overlay's global close (×) is always tappable above the panel */
-.close{ z-index: 3; }
+/* Hero refinements */
+.hero { text-align:center; margin: 0 auto; padding-inline: 16px; }
 
-/* Mobile: add an internal close in slide panels, sticky at the top */
-@media (max-width: 720px){
-  .panel {
-    position: absolute;
-    inset: 0 0 0 auto;        /* keep full height/right attach */
-    z-index: 1;               /* sits below the overlay .close */
-    overflow:auto;
-  }
-  .panel .panel-close {
-    position: sticky;
-    top: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: .4rem;
-    margin-left: auto;
-    margin-bottom: .75rem;
-    background:#fff;
-    border:1px solid #eee;
-    border-radius:999px;
-    padding:.35rem .7rem;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .panel .panel-close:active{ transform: translateY(1px); }
+.hero h1{
+  font-size: clamp(28px, 4.2vw, 40px);
+  line-height: 1.1;
+  letter-spacing: -0.2px;
+  margin: 0 0 .6rem;
 }
 
+.hero-quote{
+  max-width: 50ch;               /* keeps the line length elegant */
+  margin: 0 auto .6rem;
+  font-style: italic;
+  font-size: clamp(15px, 1.9vw, 17px);
+  line-height: 1.45;
+  color: var(--muted);
+  text-wrap: balance;            /* nicer line breaks (supported in modern browsers) */
+}
+.hero-quote .hero-attrib{
+  display:block;
+  margin-top: .35rem;
+  font-style: normal;            /* attribution not italic for readability */
+  font-size: 0.92em;
+  color: #777;
+}
+
+.hero-contact{
+  margin: .2rem 0 .8rem;
+  font-size: 17px;
+  color: #444;
+}
+.hero-contact a{ color: inherit; text-decoration: none; }
+.hero-contact a:hover{ text-decoration: underline; }
+
+/* Subtle divider */
+.hero-rule{
+  width: 64px;
+  height: 1px;
+  background: var(--line);
+  margin: .6rem auto 1rem;
+}
+
+/* Nav polish: lighter brackets until hover */
+.nav{
+  gap: 1.2rem;
+  font-size: 16px;
+}
+.nav a{
+  color: #777;
+  text-decoration: none;
+  transition: color .18s ease;
+}
+.nav a:hover{ color: #000; }
+
+/* Small screens: slightly tighter stack */
+@media (max-width: 560px){
+  .hero-quote{ max-width: 40ch; }
+  .hero-rule{ margin: .5rem auto .8rem; }
+}
 
 </style>
 </head>
 <body>
-  <main>
-  <h1>Hadi Paul Scharbrodt</h1>
-  <div class="meta">
-    <div><a href="mailto:h.scharbrodt@gmail.com">h.scharbrodt@gmail.com</a></div>
-    <div>+46 760 312 007</div>
-  </div>
-  <div class="nav">
-    <button data-overlay="about">[About]</button>
-    <button data-overlay="experience">[Experience]</button>
-    <button data-overlay="projects">[Projects]</button>
-    <button data-overlay="activities">[Activities]</button>
-  </div>
+
+<!-- Intro: line only -->
+<div id="intro" aria-hidden="true"><div class="intro-rule" aria-hidden="true"></div></div>
+
+<main>
+  <h1 class="site-title">
+  <a id="downloadResume"
+     href="Resume%20Hadi%203.pdf"
+     download="Hadi-Paul-Scharbrodt-Resume.pdf"
+     rel="noopener">Hadi Paul Scharbrodt</a>
+  </h1>
+
+  <p class="hero-quote">
+    “Hadi is a well-organized, promising and intelligent student — worldly-minded, open to challenges, and able
+    to thrive in any cultural environment.”
+    <span class="hero-attrib">— Bobo Stević, Teacher</span>
+  </p>
+
+
+  <div class="hero-rule" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Primary">
+  <a href="#about"      data-open="about">[About]</a>
+  <a href="#experience" data-open="experience">[Experience]</a>
+  <a href="#projects"   data-open="projects">[Projects]</a>
+  <a href="#activities" data-open="activities">[Activities]</a>
+</nav>
+
 </main>
 
-
-  <!-- ===== About ===== -->
-  <div id="about" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="about-title">
-    <button class="close" aria-label="Close">&times;</button>
-    <div class="overlay-content">
-      <h2 id="about-title">About</h2>
-      <p>I’m Hadi, an 18-year-old programmer and aspiring entrepreneur who has lived in six countries. I started coding at 11 and have since built tools that make education smarter — from virtual assistants to web platforms used by thousands of students. My goal is to design technology that is efficient, ethical, and empowering for communities around the world.
-</p>
-    </div>
+<!-- About -->
+<div id="about" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="about-title">
+  <button class="close" aria-label="Close">×</button>
+  <div class="overlay-content">
+    <h2 id="about-title">About Me</h2>
+    <ul style="list-style:none; padding:0; margin:1rem 0 0; font-size:14px; color:#555;">
+      <li>I'm Hadi - an 18 year old programmer and asipring entrepreneur</li>
+      <li>Lived in <strong>6 countries</strong> — fluent in English, Arabic, and Swedish</li>
+      <li>Passionate about <strong>ed-tech, AI, and entrepreneurship</strong></li>
+      <li>Stack: Python · Next.js · Tailwind · SQL · Git</li>
+      <li>Goal: Build tech that empowers students globally</li>
+    </ul>
   </div>
-
-  <!-- ===== Experience ===== -->
-  
-  
-  
-  <div id="experience" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="exp-title">
-    <button class="close" aria-label="Close">&times;</button>
-    <div class="panel">
-      <div class="overlay-content">
-        <h2 id="exp-title">Experience</h2>
-        <ul>
-          <li><strong>Intern – Al Nayzak Organisation, Jerusalem (2025–Present)</strong><br>
-              Co-developed <em>Horizons Academy</em> & <em>Pali-Swiss Hub</em> (Next.js) for 1,000+ users; built automation tools cutting recruiter screening time by ~40%.</li>
-          <li><strong>Founder & Tutor – MyMateTeaches, Lund (2024–25)</strong><br>
-              Instagram-based tutoring reaching 20+ IB & SNP students weekly; average grade gains ~4 points.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-
-
-
-  <!-- ===== Projects ===== -->
-  <div id="projects" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="proj-title">
-    <div class="overlay-content">
-  <h2 id="proj-title">Projects</h2>
-  <ul class="proj-list">
-  <li><button class="proj-btn" data-pop="merge">Sorting Algorithm Analyzer</button> — Benchmarked Merge, Bubble & Radix Sort in Python.</li>
-  <li><button id="openQuiz" class="proj-btn">IB Psychology Quiz App</button> — Minimal SAQ trainer for IB psychology.</li>
-  <li><button class="proj-btn" disabled><strong>ISL Voice Assistant</strong></button> — Campus navigation prototype (removed from site).</li>
-</ul>
-
-  <p class="pop-note">Hover the underlined project titles to preview the concept.</p>
 </div>
 
+
+<!-- Experience -->
+<div id="experience" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="exp-title">
+  <button class="close" aria-label="Close">×</button>
+  <div class="panel">
+    <div class="overlay-content">
+      <h2 id="exp-title">Experience</h2>
+      <ul>
+        <li><strong>Intern — Al Nayzak, Jerusalem (2025)</strong><br>Co-built Horizons Academy & Pali-Swiss Hub (Next.js) for 1,000+ users; tooling cut recruiter screening time ~40%.</li>
+        <li><strong>Founder — MyMateTeaches, Lund (2024–25)</strong><br>IG-based tutoring for 20+ IB/SNP students weekly; average grade gains ~4 points.</li>
+      </ul>
+    </div>
+  </div>
 </div>
 
+<!-- Projects -->
+<div id="projects" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="proj-title">
+  <div class="overlay-content">
+    <h2 id="proj-title">Projects</h2>
+    <ul>
+      <li>
+        <button class="proj-btn" data-pop="sort" style="all:unset;cursor:pointer;font-weight:700">Sorting Algorithm Analyzer</button>
+        — <strong> Problem </strong>: students don’t understand the importance of algorithmic complexity. <strong> Solution </strong>: live visualizer + time benchmarks. <strong> Impact </strong>: Students understand the importance 
+      </li>
+      <li>
+        <button id="openQuiz" class="proj-btn" style="all:unset;cursor:pointer;font-weight:700">IB Psychology Quiz App</button>
+        — <strong> Problem </strong>: info overload from IB. <strong> Solution </strong>: spaced flashcards with “study/concepts” scaffolding. <strong> Impact </strong>: session length, repeat users, or anecdotal wins.
+      </li>
+      <li><strong>ISL Voice Assistant</strong> — <strong> Problem </strong>: New students find it hard to navigate around the school. <strong> Solution </strong>: Make a bot that helps students find their way. <strong> Impact </strong>: Quality of Life for students increase.</li>
+    </ul>
+    <p class="meta" style="color:#666;font-size:12px;margin-top:.4rem">Hover “Sorting Algorithm Analyzer” to preview. Click the quiz to open.</p>
   </div>
+</div>
 
-  <!-- ===== Activities ===== -->
-  <div id="activities" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="act-title">
-    <button class="close" aria-label="Close">&times;</button>
-    <div class="panel">
-      <div class="overlay-content">
-        <h2 id="act-title">Activities & Volunteering</h2>
-        <ul>
-          <li><strong>Shatila Community Centre, Beirut (2025)</strong> — Youth English workshops & cultural activities.</li>
-          <li><strong>European Youth Week (2024)</strong> — Represented Sweden at EU workshops on sustainability & digital innovation.</li>
-          <li><strong>Model UN Malmö (2024)</strong> — Delegate for France on gender equality.</li>
-          <li><strong>GoPalestine Camp (2023)</strong> — Sustainable farming support & art-therapy for hospitalised children.</li>
-          <li><strong>Founder – IB Volleyball Tournament Sweden (2022)</strong> — 200+ students, 4 schools.</li>
-        </ul>
-      </div>
+<!-- Activities -->
+<div id="activities" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="act-title">
+  <button class="close" aria-label="Close">×</button>
+  <div class="panel">
+    <div class="overlay-content">
+      <h2 id="act-title">Activities & Volunteering</h2>
+      <ul>
+        <li><strong>Shatila Community Centre, Beirut (2025)</strong> — Youth English & cultural workshops.</li>
+        <li><strong>European Youth Week (2024)</strong> — Sweden rep at EU sustainability & digital forums.</li>
+        <li><strong>Model UN Malmö (2024)</strong> — Delegate for France (gender equality).</li>
+        <li><strong>GoPalestine Camp (2023)</strong> — Sustainable farming & art-therapy support.</li>
+        <li><strong>Founder — IB Volleyball Sweden (2022)</strong> — 200+ students, four schools.</li>
+      </ul>
     </div>
   </div>
+</div>
 
-  <!-- ===== Merge popover (hover) ===== -->
-  <div id="pop-merge" class="popover" aria-hidden="true">
-    <canvas id="mergeCanvas" width="240" height="120" aria-label="Merge sort visual"></canvas>
+<!-- Sorting popover -->
+<div id="pop-sort" class="popover" aria-hidden="true">
+  <canvas id="sortCanvas" width="240" height="120" aria-label="Sorting visual"></canvas>
+</div>
+
+<!-- Quiz dialog -->
+<dialog id="quizDialog" aria-labelledby="qd-title">
+  <div class="qd-head">
+    <div id="qd-title" class="qd-title">IB Psychology — SAQ Trainer</div>
+    <button class="qd-close" aria-label="Close">✕</button>
   </div>
-
-  <!-- ===== Quiz modal (animated) ===== -->
-  <dialog id="quizDialog" aria-labelledby="qd-title">
-    <div class="qd-head">
-      <div class="qd-title" id="qd-title">IB Psychology — SAQ Trainer</div>
-      <button class="qd-close" aria-label="Close">✕</button>
-    </div>
-    <div class="qd-body">
-      <iframe id="quizFrame" title="IB Psychology SAQ" sandbox="allow-scripts" referrerpolicy="no-referrer" srcdoc='
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <div class="qd-body">
+    <iframe title="IB Psychology SAQ" sandbox="allow-scripts" referrerpolicy="no-referrer" srcdoc='
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-  :root {
-    --muted:#6a6a6a;
-    --line:#eaeaea;
-  }
-  body {
-    margin:0;
-    font-family:Georgia,serif;
-    background:#fff;
-    color:#111;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    min-height:100vh;
-  }
-  .wrap {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    padding:28px 32px;
-    border-radius:12px;
-    max-width:640px;
-    width:90%;
-    box-shadow:0 6px 32px rgba(0,0,0,.06);
-    border:1px solid var(--line);
-  }
-  h3 {
-    margin:0 0 8px;
-    font-size:18px;
-    font-weight:700;
-  }
-  .hint {
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:12px;
-  }
-  hr {
-    border:0;
-    border-top:1px solid var(--line);
-    width:100%;
-    margin:10px 0 14px;
-  }
-  #q {
-    line-height:1.6;
-    margin:0 0 14px;
-    font-size:15px;
-  }
-  .meta-block {
-    color:var(--muted);
-    font-size:14px;
-    background:#fafafa;
-    border:1px solid var(--line);
-    padding:10px 12px;
-    border-radius:8px;
-    margin:0 0 16px;
-    width:100%;
-    text-align:left;
-  }
-  .row {
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    justify-content:center;
-  }
-  button {
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:20px;
-    padding:6px 14px;
-    font-size:14px;
-    cursor:pointer;
-    transition:all .2s ease;
-  }
-  button:hover {
-    border-color:#aaa;
-    transform:translateY(-1px);
-  }
-  .score {
-    margin-top:12px;
-    font-weight:700;
-    color:#111;
-  }
+  :root{--muted:#6a6a6a;--line:#eaeaea}
+  body{margin:0;font-family:Georgia,serif;background:#fff;color:#111;display:grid;place-items:center;min-height:100vh}
+  .wrap{padding:24px 28px;border:1px solid var(--line);border-radius:12px;max-width:640px;width:92%;text-align:center;box-shadow:0 6px 28px rgba(0,0,0,.06)}
+  #q{margin:0 0 12px;line-height:1.55}
+  .meta{display:none;margin:8px 0 14px;text-align:left;color:var(--muted);font-size:14px;background:#fafafa;border:1px solid var(--line);padding:10px;border-radius:8px;white-space:pre-line}
+  .row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  button{background:#fff;border:1px solid #ddd;border-radius:18px;padding:6px 12px;font-size:14px;cursor:pointer;transition:.2s}
+  button:hover{border-color:#aaa;transform:translateY(-1px)}
 </style>
-
-</head>
-<body>
-  <div class="wrap">
-
-    <p id="q"></p>
-    <div id="info"></div>
-    <div class="actions">
-      <button data-a="next">Next</button>
-      <button data-a="study">Study</button>
-      <button data-a="concepts">Concepts</button>
-      
-    </div>
+<div class="wrap">
+  <p id="q"></p>
+  <div id="info" class="meta"></div>
+  <div class="row">
+    <button data-a="next">Next</button>
+    <button data-a="study">Study</button>
+    <button data-a="concepts">Concepts</button>
   </div>
+</div>
 <script>
-  const data=[
-    {"question":"Explain one technique used to study the brain in relation to behavior","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"MRI — what it is and how it works; Present and explain Maguire; Conclude"},
-    {"question":"Outline localization of brain function using one relevant piece of research.","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"Theory of localization (structural and functional); Present Maguire; Conclude"},
-    {"question":"Explain neuroplasticity using one relevant piece of research.","study":"Maguire et al. (2000) / Luby et al.","concepts":"Define neuroplasticity; Environment influences structure/function; Present Luby; Conclude"},
-    {"question":"Describe neurotransmission using one relevant study.","study":"Fisher, Aron and Brown (2005) – Dopamine and Attraction","concepts":"Define neurotransmitters and process; Dopamine and attraction; Present study; Conclude"},
-    {"question":"Describe synaptic pruning using one relevant study.","study":"Luby et al. (2013) – Preschool Depression","concepts":"Neuroplasticity and neural circuits; Environment and stressors; Present Luby; Less grey matter with pruning"},
-    {"question":"Explain one inhibitory neurotransmitter’s effect on behavior.","study":"Crockett et al. (2010) – Trolley Problem","concepts":"Excitatory vs inhibitory; Serotonin and prosocial behavior; Present study"},
-    {"question":"Explain one excitatory neurotransmitter’s effect on behavior.","study":"Fisher, Aron and Brown (2005) – Dopamine and Attraction","concepts":"Excitatory vs inhibitory; Dopamine and attachment; Present study"},
-    {"question":"Explain neural networks with one study.","study":"Luby et al. (2013) (or Fisher / Maguire)","concepts":"Neural networks and transmission; dopamine / plasticity / pruning; Present study"},
-    {"question":"Explain the impact of agonists on behavior with one study.","study":"Davis et al. (1978) – Physostigmine (agonist)","concepts":"Agonists and antagonists; Physostigmine and memory; Present study; Conclude"},
-    {"question":"Explain the impact of antagonists on behavior with one study.","study":"Antonova et al. (2011) – Scopolamine (antagonist)","concepts":"Neurotransmission; Antagonists and memory; Present study; Conclude"},
-    {"question":"Describe one research method for brain–behavior with a study.","study":"Maguire et al. (2000)","concepts":"Experiments and quasi-experiments; scope includes hormones/pheromones/genes; Present Maguire"},
-    {"question":"Outline effects of hormones on behavior.","study":"Schneiderman et al. (2012) – Oxytocin (early attachment)","concepts":"What hormones are and how they act; Oxytocin and attachment; Present study"},
-    {"question":"Explain effects of pheromones on behavior.","study":"Saxton et al. (2008) – Androstadienone and attractiveness","concepts":"Define pheromones (sex pheromones); Androstadienone and attraction; Present study"},
-    {"question":"Describe how genetic inheritance influences behavior.","study":"Rushton and Bons (2005) – Similarity on a Genetic Level","concepts":"Genetics vs environment; Twin/family logic; Present study"},
-    {"question":"Explain how a particular gene can influence behavior.","study":"Sadikaj, Moskowitz and Bartz (CD38 / attachment)","concepts":"Molecular genetics methods; CD38 and attraction; Present study"},
-    {"question":"Explain one evolutionary explanation for behavior.","study":"Wedekind (1995)","concepts":"Natural selection and evolutionary psychology; Biological origins of attraction; Present study; Conclude"},
-    {"question":"Outline one ethical consideration in the biological approach.","study":"Crockett / drug infusion studies","concepts":"Protection from harm; physostigmine / citalopram / scopolamine; Evaluate and conclude"},
-    {"question":"Explain how one research method is used in the biological approach.","study":"Maguire et al.","concepts":"Experiments vs quasi; Present study; Conclude"}
-  ];
-  let i=-1,score=0;
-  const q=document.getElementById("q"),info=document.getElementById("info"),sc=document.getElementById("score");
-  function next(){i++;info.style.display="none";info.textContent="";q.textContent=(i>=data.length)?"Quiz completed!":data[i].question;}
-  function reveal(t){if(i<0||i>=data.length)return;info.style.display="block";info.textContent=(t==="study")?("Study: "+data[i].study):("Concepts: "+data[i].concepts);}
-  function mark(ok){if(ok){score++;sc.textContent="Score: "+score;}}
-  document.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>{const a=b.dataset.a;if(a==="next")next();else if(a==="study")reveal("study");else if(a==="concepts")reveal("concepts");else if(a==="y")mark(true);else if(a==="n")mark(false);}));
-  addEventListener("keydown",e=>{if(e.key==="n"||e.key==="N")next();if(e.key==="s"||e.key==="S")reveal("study");if(e.key==="c"||e.key==="C")reveal("concepts");if(e.key==="y"||e.key==="Y")mark(true);if(e.key==="m"||e.key==="M")mark(false);});
+  const data=[{"question":"Explain one technique used to study the brain in relation to behavior","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"• MRI — what it is & how it works\\n• Present & explain Maguire\\n• Conclude"},
+  {"question":"Outline localization of brain function using one relevant piece of research.","study":"Maguire et al. (2000) – Taxi Drivers","concepts":"• Theory of localization (structural/functional)\\n• Present Maguire\\n• Conclude"},
+  {"question":"Explain neuroplasticity using one relevant piece of research.","study":"Maguire et al. (2000) / Luby et al.","concepts":"• Define neuroplasticity\\n• Environment → structure/function\\n• Present Luby\\n• Conclude"},
+  {"question":"Describe neurotransmission using one relevant study.","study":"Fisher, Aron & Brown (2005) – Dopamine & Attraction","concepts":"• Neurotransmitters & process\\n• Dopamine + attraction\\n• Present study"}];
+  let i=-1; const q=document.getElementById("q"),info=document.getElementById("info");
+  const next=()=>{i++; info.style.display="none"; info.textContent=""; q.textContent=(i>=data.length)?"Quiz completed!":data[i].question;}
+  const show=t=>{ if(i<0||i>=data.length) return; info.style.display="block"; info.textContent=t==="study"?"Study: "+data[i].study:"Concepts:\\n"+data[i].concepts; }
+  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>({next,study:()=>show("study"),concepts:()=>show("concepts")}[b.dataset.a]?.()));
+  addEventListener("keydown",e=>{if("Nn".includes(e.key))next(); if("Ss".includes(e.key))show("study"); if("Cc".includes(e.key))show("concepts")});
   next();
-</script>
-</body>
-</html>'></iframe>
-    </div>
-  </dialog>
+</script>'></iframe>
+  </div>
+</dialog>
 
 <script>
-/* ===== Overlay open/close (tap outside to close) ===== */
-(function () {
-  const buttons = document.querySelectorAll("[data-overlay]");
-  const overlays = document.querySelectorAll(".overlay");
+/* Intro → nav reveal (line only) */
+(() => {
+  const intro = document.getElementById('intro');
+  const prev = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(() => {
+    document.body.classList.add('ready');
+    intro.classList.add('done');
+    intro.addEventListener('transitionend', () => { intro.remove(); document.body.style.overflow = prev; }, { once:true });
+  }, reduced ? 250 : 1100);
+})();
 
-  function openOverlay(id){
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.classList.add("active");
-    document.body.style.overflow = "hidden";   // lock background scroll
-  }
-
-  function closeOverlay(el){
-    if(!el) return;
-    el.classList.remove("active");
-    document.body.style.overflow = "";         // restore scroll
-  }
-
-  // open via nav buttons
-  buttons.forEach(btn=>{
-    btn.addEventListener("click", ()=> openOverlay(btn.dataset.overlay));
-  });
-
-  // close logic
-  overlays.forEach(o=>{
-    const closeBtn = o.querySelector(".close");
-    if(closeBtn) closeBtn.addEventListener("click", ()=> closeOverlay(o));
-
-    // click/tap outside content closes (works for both fade-blur and slide)
-    o.addEventListener("click", (e)=>{
-      const panel   = o.querySelector(".panel");             // slide overlays
-      const content = o.querySelector(".overlay-content");   // fade-blur overlays
-
-      // if a slide overlay: close when click is OUTSIDE the panel
-      if (panel && !panel.contains(e.target)) { closeOverlay(o); return; }
-
-      // if a fade-blur overlay: close when click is OUTSIDE the centered content
-      if (!panel && content && !content.contains(e.target)) { closeOverlay(o); return; }
-
-      // if neither panel nor content captured it, clicking the blank backdrop also closes
-      if (e.target === o) { closeOverlay(o); }
+/* Overlays open/close + tap outside */
+(() => {
+  const openers = document.querySelectorAll('[data-open]');
+  openers.forEach(btn => btn.addEventListener('click', () => {
+    const el = document.getElementById(btn.dataset.open);
+    if (!el) return;
+    el.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }));
+  const overlays = document.querySelectorAll('.overlay');
+  const closeOverlay = (el) => { el.classList.remove('active'); document.body.style.overflow = ''; };
+  overlays.forEach(o => {
+    const x = o.querySelector('.close');
+    if (x) x.addEventListener('click', () => closeOverlay(o));
+    o.addEventListener('click', (e) => {
+      const panel = o.querySelector('.panel');
+      const content = o.querySelector('.overlay-content');
+      const outsidePanel  = panel && !panel.contains(e.target);
+      const outsideCenter = !panel && content && !content.contains(e.target);
+      if (outsidePanel || outsideCenter || e.target === o) closeOverlay(o);
     });
-
-    // ESC to close
-    document.addEventListener("keydown", (e)=>{
-      if(e.key === "Escape") closeOverlay(o);
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && o.classList.contains('active')) closeOverlay(o); });
   });
 })();
-</script>
 
+/* Sorting popover with merge-sort animation */
+(() => {
+  const trigger = document.querySelector('[data-pop="sort"]');
+  const pop = document.getElementById('pop-sort');
+  const canvas = document.getElementById('sortCanvas');
+  const ctx = canvas.getContext && canvas.getContext('2d');
+  let frames=[],idx=0,anim=null,follow=null,visible=false,hideTimer=null;
 
-<script>
-/* ===== Merge popover (hover) ===== */
-(function(){
-  const trigger=document.querySelector('[data-pop="merge"]');
-  const pop=document.getElementById('pop-merge');
-  let timer=null, follow=null, active=false;
+  function makeData(n=28){const a=Array.from({length:n},(_,i)=>i+1);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function record(arr,hl=[]){frames.push({arr:arr.slice(),hl:hl.slice()});}
+  function mergeSort(arr,l=0,r=arr.length){
+    if(r-l<=1) return arr.slice(l,r);
+    const m=Math.floor((l+r)/2),L=mergeSort(arr,l,m),R=mergeSort(arr,m,r),M=[];let i=0,j=0;
+    while(i<L.length||j<R.length){
+      const takeLeft= j>=R.length || (i<L.length && L[i]<=R[j]);
+      M.push(takeLeft?L[i++]:R[j++]);
+      const cur=arr.slice(0,l).concat(M).concat(L.slice(i)).concat(R.slice(j)).concat(arr.slice(r));
+      record(cur,[l,r]);
+    }
+    for(let k=0;k<M.length;k++){arr[l+k]=M[k];record(arr,[l,r]);}
+    return arr.slice(l,r);
+  }
+  function draw({arr,hl}){if(!ctx) return; ctx.clearRect(0,0,canvas.width,canvas.height);
+    const w=canvas.width,h=canvas.height,n=arr.length,bw=w/n,max=Math.max(...arr);
+    for(let i=0;i<n;i++){const val=arr[i];const bh=(val/max)*(h-6);const x=i*bw,y=h-bh;
+      ctx.globalAlpha=(hl && i>=hl[0] && i<hl[1])?0.95:0.65; ctx.fillRect(x+0.5,y,bw-1,bh);}
+    ctx.globalAlpha=1;
+  }
+  function start(){
+    if(!ctx) return;
+    frames=[]; idx=0; const base=makeData(28); record(base); mergeSort(base.slice());
+    cancelAnimationFrame(anim);
+    let last=0; const step=(ts)=>{ if(ts-last>55){ draw(frames[idx]); idx=(idx+1)%frames.length; last=ts; } anim=requestAnimationFrame(step); };
+    anim=requestAnimationFrame(step);
+  }
+  function stop(){ if(anim) cancelAnimationFrame(anim); anim=null; }
 
   function position(e){
-    if(!active) return;
-    const pad=14, x=(e.clientX||0)+pad, y=(e.clientY||0)+pad;
+    if(!visible) return;
+    const pad=14, x=(e.clientX||innerWidth/2)+pad, y=(e.clientY||innerHeight/2)+pad;
     const r=pop.getBoundingClientRect(), vw=innerWidth, vh=innerHeight;
     pop.style.transform=`translate(${(x+r.width>vw-8?x-r.width-pad*2:x)}px,${(y+r.height>vh-8?y-r.height-pad*2:y)}px)`;
   }
   function show(e){
-    clearTimeout(timer); pop.classList.add('show'); pop.style.pointerEvents='auto';
-    active=true; position(e); follow=ev=>position(ev);
-    document.addEventListener('mousemove',follow,{passive:true}); startMergeAnim();
+    clearTimeout(hideTimer); pop.classList.add('show'); pop.style.pointerEvents='auto';
+    visible=true; position(e); follow=(ev)=>position(ev);
+    document.addEventListener('mousemove',follow,{passive:true});
+    start();
   }
   function hide(){
-    clearTimeout(timer); timer=setTimeout(()=>{ pop.classList.remove('show'); pop.style.pointerEvents='none';
-      active=false; if(follow) document.removeEventListener('mousemove',follow); stopMergeAnim(); },120);
+    clearTimeout(hideTimer);
+    hideTimer=setTimeout(()=>{ pop.classList.remove('show'); pop.style.pointerEvents='none';
+      visible=false; document.removeEventListener('mousemove',follow); stop(); },120);
   }
-  if(trigger){ trigger.addEventListener('mouseenter',show); trigger.addEventListener('mouseleave',hide);
-    pop.addEventListener('mouseenter',()=>clearTimeout(timer)); pop.addEventListener('mouseleave',hide); }
 
-  /* tiny merge anim */
-  const canvas=document.getElementById('mergeCanvas'); const ctx=canvas&&canvas.getContext?canvas.getContext('2d'):null;
-  let frames=[],idx=0, anim=null;
-  function makeData(n=28){const a=Array.from({length:n},(_,i)=>i+1);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-  function record(arr,hl=[]){frames.push({arr:arr.slice(),hl:hl.slice()});}
-  function mergeSort(arr,l=0,r=arr.length){if(r-l<=1)return arr.slice(l,r);const m=Math.floor((l+r)/2),L=mergeSort(arr,l,m),R=mergeSort(arr,m,r);const M=[];let i=0,j=0;
-    while(i<L.length||j<R.length){const t=j>=R.length||(i<L.length&&L[i]<=R[j]);M.push(t?L[i++]:R[j++]);const cur=arr.slice(0,l).concat(M).concat(L.slice(i)).concat(R.slice(j)).concat(arr.slice(r));record(cur,[l,r]);}
-    for(let k=0;k<M.length;k++){arr[l+k]=M[k];record(arr,[l,r]);}return arr.slice(l,r);}
-  function draw({arr,hl}){if(!ctx)return;ctx.clearRect(0,0,canvas.width,canvas.height);const w=canvas.width,h=canvas.height,n=arr.length,bw=w/n,max=Math.max(...arr);
-    for(let i=0;i<n;i++){const val=arr[i],bh=(val/max)*(h-6),x=i*bw,y=h-bh;ctx.globalAlpha=(hl&&i>=hl[0]&&i<hl[1])?0.9:0.6;ctx.fillRect(x+0.5,y,bw-1,bh);}ctx.globalAlpha=1;}
-  function startMergeAnim(){if(!ctx)return;frames=[];idx=0;const base=makeData(28);record(base);mergeSort(base.slice());if(anim)cancelAnimationFrame(anim);
-    let last=0;function step(ts){if(ts-last>55){draw(frames[idx]);idx=(idx+1)%frames.length;last=ts;}anim=requestAnimationFrame(step);}anim=requestAnimationFrame(step);}
-  function stopMergeAnim(){if(anim){cancelAnimationFrame(anim);anim=null;}}
+  if(trigger){
+    trigger.addEventListener('mouseenter',show);
+    trigger.addEventListener('mouseleave',hide);
+    pop.addEventListener('mouseenter',()=>clearTimeout(hideTimer));
+    pop.addEventListener('mouseleave',hide);
+    // Mobile: tap to toggle for 2.5s
+    trigger.addEventListener('touchstart',(e)=>{ e.preventDefault(); show(e.touches[0]); setTimeout(hide,2500); },{passive:false});
+  }
 })();
-</script>
 
-<script>
-/* ===== Quiz dialog open/close with animation ===== */
-(function(){
-  const btn=document.getElementById('openQuiz');
-  const dlg=document.getElementById('quizDialog');
-  const close=dlg.querySelector('.qd-close');
-
-  function openModal(){
-    if(typeof dlg.showModal==='function'){dlg.showModal();}else{dlg.setAttribute('open','');}
-    requestAnimationFrame(()=>dlg.classList.add('is-open'));
-  }
-  function closeModal(){
-    dlg.classList.remove('is-open');
-    const done=()=>{dlg.close?dlg.close():dlg.removeAttribute('open');dlg.removeEventListener('transitionend',done);};
-    dlg.addEventListener('transitionend',done,{once:true});
-  }
-  btn.addEventListener('click',openModal);
-  close.addEventListener('click',closeModal);
-  dlg.addEventListener('cancel',e=>{e.preventDefault();closeModal();}); // ESC
-  // backdrop click to close
-  dlg.addEventListener('click',(e)=>{
-    const r=dlg.getBoundingClientRect();
-    const outside = e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom;
-    if(outside) closeModal();
+/* Quiz dialog open/close */
+(() => {
+  const btn = document.getElementById('openQuiz');
+  const dlg = document.getElementById('quizDialog');
+  const x = dlg.querySelector('.qd-close');
+  const open = () => { (dlg.showModal ? dlg.showModal() : dlg.setAttribute('open','')); requestAnimationFrame(() => dlg.classList.add('is-open')); };
+  const close = () => { dlg.classList.remove('is-open'); dlg.addEventListener('transitionend', () => { dlg.close ? dlg.close() : dlg.removeAttribute('open'); }, { once:true }); };
+  btn.addEventListener('click', open);
+  x.addEventListener('click', close);
+  dlg.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+  dlg.addEventListener('click', (e) => {
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close();
   });
 })();
 </script>
-
 </body>
 </html>
