@@ -23,39 +23,117 @@ h1{margin:0 0 .35rem;font-size:30px;font-weight:700;letter-spacing:-.2px}
   color:#666; font-size:16px; opacity:0; transform:translateY(-10px);
   pointer-events:none; transition:opacity .45s ease, transform .45s ease;
 }
-.nav button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;opacity:0;transform:translateY(-6px);transition:opacity .45s ease,transform .45s ease}
-.nav button:hover{color:#000}
+.nav a{ color:#777; text-decoration:none; transition: color .18s ease; }
+.nav a:hover{ color:#000; }
 body.ready .nav{opacity:1;transform:none;pointer-events:auto}
-body.ready .nav button{opacity:1;transform:none}
-body.ready .nav button:nth-child(1){transition-delay:.05s}
-body.ready .nav button:nth-child(2){transition-delay:.12s}
-body.ready .nav button:nth-child(3){transition-delay:.19s}
-body.ready .nav button:nth-child(4){transition-delay:.26s}
 
-/* Intro: line only */
-#intro{position:fixed;inset:0;background:#fff;display:grid;place-items:center;z-index:9999;transition:opacity .5s ease}
+/* —— Minimalist Loader (Awwwards-inspired) —— */
+#intro{
+  position:fixed;inset:0;background:#fff;z-index:9999;display:grid;place-items:center;
+  transition:opacity .5s ease;
+}
 #intro.done{opacity:0;pointer-events:none}
-.intro-rule{width:0;height:1px;background:#000;animation:introLine .9s ease-out forwards .2s}
-@keyframes introLine{to{width:80px}}
-@media (prefers-reduced-motion:reduce){#intro{transition:none}.intro-rule{animation:none;width:80px}}
+.loader-wrap{
+  width:min(820px,92vw);
+  display:flex; flex-direction:column; align-items:center; gap:18px; text-align:center;
+}
+.loader-quote{
+  line-height:1.28; font-size:clamp(16px,2.2vw,22px); letter-spacing:-.2px;
+  color:#111; max-width:52ch; text-wrap:balance;
+}
+.loader-quote .attrib{
+  display:block; margin-top:.6rem; font-size:.92em; color:#777;
+}
+.loader-line{
+  position:relative; width:min(420px,72vw); height:1px; background:var(--line); overflow:hidden;
+}
+.loader-line::after{
+  content:""; position:absolute; inset:0; width:0; background:#111; height:100%;
+  transform-origin:left; transition:width 1.2s ease;
+}
+#intro.progress .loader-line::after{ width:var(--w,0%); }
 
-/* Overlays */
+.loader-meta{
+  display:flex; align-items:center; gap:10px; font-size:12px; color:#666; letter-spacing:.6px;
+  text-transform:uppercase;
+}
+.loader-pct{min-width:2ch; font-variant-numeric:tabular-nums}
+
+/* Staggered fade for quote characters */
+.char{opacity:0; transform:translateY(6px); display:inline-block}
+.char.show{opacity:1; transform:none; transition:opacity .4s ease, transform .4s ease}
+
+/* Skip */
+.skip{
+  all:unset; cursor:pointer; font-size:12px; color:#888; padding:.3rem .6rem; border:1px solid #ddd; border-radius:999px;
+  margin-top:4px;
+}
+.skip:hover{ color:#000; border-color:#bbb }
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  #intro{transition:none}
+  .char{opacity:1; transform:none}
+  .loader-line::after{transition:none}
+}
+
+/* Overlays (base) */
 .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none}
 .overlay.active{opacity:1;pointer-events:auto}
-.close{position:absolute;top:2rem;right:2rem;background:none;border:0;cursor:pointer;color:#666;font-size:20px}
-.close:hover{color:#000}
-.fade-blur{background:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:opacity .25s ease}
-.fade-blur .overlay-content{max-width:36rem;padding:1rem 2rem;text-align:center;color:#333;line-height:1.55;transform:translateY(6px);opacity:0;transition:opacity .25s ease,transform .25s ease}
-.fade-blur.active .overlay-content{opacity:1;transform:none}
-.slide{background:transparent;transition:opacity .2s ease}
-.slide .panel{position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);background:#fff;border-left:1px solid var(--line);box-shadow:0 0 40px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;padding:2rem;transform:translateX(100%);transition:transform .35s ease}
-.slide.active .panel{transform:none}
-
 .overlay-content{max-width:34rem;font-size:15px;color:#333}
 h2{margin:0 0 .5rem;font-size:18px;font-weight:700}
 p{margin:.5rem 0}
 ul{list-style:none;margin:.5rem 0;padding:0}
 li{margin:.35rem 0}
+
+/* Fade-blur style */
+.fade-blur{background:rgba(255,255,255,.75);backdrop-filter:blur(6px);transition:opacity .25s ease}
+.fade-blur .overlay-content{max-width:36rem;padding:1rem 2rem;text-align:center;color:#333;line-height:1.55;transform:translateY(6px);opacity:0;transition:opacity .25s ease,transform .25s ease}
+.fade-blur.active .overlay-content{opacity:1;transform:none}
+
+/* Slide-in panel style */
+.slide{background:transparent;transition:opacity .2s ease}
+.slide .panel{
+  position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);background:#fff;
+  border-left:1px solid var(--line);box-shadow:0 0 40px rgba(0,0,0,.06);
+  display:flex;align-items:flex-start;justify-content:center;padding:2rem 2rem 3.5rem;
+  transform:translateX(100%);transition:transform .35s ease;overflow:auto;-webkit-overflow-scrolling:touch;
+}
+.slide.active .panel{transform:none}
+
+/* Top-right utility links */
+.util{
+  position:fixed; top:18px; right:18px;
+  display:flex; gap:.6rem; align-items:center;
+  font-size:12px; line-height:1;
+  opacity:0; transform:translateY(-6px);
+  transition:opacity .35s ease, transform .35s ease;
+  z-index:10;
+}
+body.ready .util{ opacity:.9; transform:none }
+.util a{ color:#666; text-decoration:none }
+.util a:hover{ color:#000; text-decoration:underline }
+@media (max-width:560px){
+  .util{ top:14px; right:12px; gap:.5rem; font-size:11px }
+}
+
+/* Legacy top-right close for fade-blur overlays */
+.close{
+  position:absolute;top:2rem;right:2rem;background:none;border:0;cursor:pointer;color:#666;font-size:20px;
+  padding:.6rem;border-radius:10px;
+}
+.close:hover{color:#000}
+
+/* Bottom-left "×" (slide overlays) */
+.close-inline{
+  all:unset; cursor:pointer; font-size:22px; color:#666;
+  position:fixed; left:18px; bottom:18px; z-index:20; line-height:1;
+  padding:.5rem .6rem; border-radius:10px; transition:color .2s ease, transform .2s ease;
+}
+.close-inline:hover{ color:#000; transform:scale(1.1) }
+@media (max-width:560px){
+  .close-inline{ left:14px; bottom:14px; font-size:24px }
+}
 
 /* Quiz dialog */
 #quizDialog{border:0;border-radius:12px;padding:0;overflow:hidden;width:min(720px,92vw);box-shadow:0 18px 48px rgba(0,0,0,.1);opacity:0;transform:translateY(8px) scale(.98);transition:opacity .25s ease,transform .25s ease}
@@ -83,7 +161,7 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   h1{font-size:clamp(22px,6.2vw,30px)}
   .meta{font-size:clamp(14px,3.8vw,18px)}
   .nav{gap:.6rem 1rem;font-size:clamp(13px,3.6vw,16px)}
-  .slide .panel{width:100vw;padding:1.25rem;border-left:0;border-top:1px solid var(--line);box-shadow:none}
+  .slide .panel{width:100vw;padding:1.25rem 1.25rem 3.5rem;border-left:0;border-top:1px solid var(--line);box-shadow:none}
   .fade-blur .overlay-content{padding:.9rem 1rem;margin:0 10px}
   #quizDialog{width:96vw;border-radius:10px}
   .qd-body{height:70svh}
@@ -91,38 +169,12 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
 
 /* Hero refinements */
 .hero { text-align:center; margin: 0 auto; padding-inline: 16px; }
-
 .hero h1{
   font-size: clamp(28px, 4.2vw, 40px);
   line-height: 1.1;
   letter-spacing: -0.2px;
   margin: 0 0 .6rem;
 }
-
-.hero-quote{
-  max-width: 50ch;               /* keeps the line length elegant */
-  margin: 0 auto .6rem;
-  font-style: italic;
-  font-size: clamp(15px, 1.9vw, 17px);
-  line-height: 1.45;
-  color: var(--muted);
-  text-wrap: balance;            /* nicer line breaks (supported in modern browsers) */
-}
-.hero-quote .hero-attrib{
-  display:block;
-  margin-top: .35rem;
-  font-style: normal;            /* attribution not italic for readability */
-  font-size: 0.92em;
-  color: #777;
-}
-
-.hero-contact{
-  margin: .2rem 0 .8rem;
-  font-size: 17px;
-  color: #444;
-}
-.hero-contact a{ color: inherit; text-decoration: none; }
-.hero-contact a:hover{ text-decoration: underline; }
 
 /* Subtle divider */
 .hero-rule{
@@ -132,64 +184,53 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   margin: .6rem auto 1rem;
 }
 
-/* Nav polish: lighter brackets until hover */
-.nav{
-  gap: 1.2rem;
-  font-size: 16px;
-}
-.nav a{
-  color: #777;
-  text-decoration: none;
-  transition: color .18s ease;
-}
-.nav a:hover{ color: #000; }
-
-/* Small screens: slightly tighter stack */
-@media (max-width: 560px){
-  .hero-quote{ max-width: 40ch; }
-  .hero-rule{ margin: .5rem auto .8rem; }
-}
-
+.site-title a{ color: inherit; text-decoration: none; }
+.site-title a:hover{ text-decoration: underline; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<!-- Intro: line only -->
-<div id="intro" aria-hidden="true"><div class="intro-rule" aria-hidden="true"></div></div>
+<!-- Loader with quote -->
+<div id="intro" aria-live="polite">
+  <div class="loader-wrap" aria-label="Loading">
+    <div class="loader-quote">
+      <span id="quoteChars"></span>
+      <span class="attrib" id="quoteAttrib">— Bobo Stević, Teacher</span>
+    </div>
+    <div class="loader-line" aria-hidden="true"></div>
+    <div class="loader-meta" id="loaderMeta">
+      <span>Loading</span>
+      <span class="loader-pct" id="loaderPct">0</span><span>%</span>
+    </div>
+    <button id="skipLoader" class="skip" aria-label="Skip intro">Skip</button>
+  </div>
+</div>
 
 <main>
-  <h1 class="site-title">
-  <a id="downloadResume"
-     href="Resume%20Hadi%203.pdf"
-     download="Hadi-Paul-Scharbrodt-Resume.pdf"
-     rel="noopener">Hadi Paul Scharbrodt</a>
-  </h1>
-
-  <p class="hero-quote">
-    “Hadi is a well-organized, promising and intelligent student — worldly-minded, open to challenges, and able
-    to thrive in any cultural environment.”
-    <span class="hero-attrib">— Bobo Stević, Teacher</span>
-  </p>
-
-
+  <h1 class="site-title">Hadi Paul Scharbrodt</h1>
   <div class="hero-rule" aria-hidden="true"></div>
-
   <nav class="nav" aria-label="Primary">
-  <a href="#about"      data-open="about">[About]</a>
-  <a href="#experience" data-open="experience">[Experience]</a>
-  <a href="#projects"   data-open="projects">[Projects]</a>
-  <a href="#activities" data-open="activities">[Activities]</a>
-</nav>
-
+    <a href="#about"      data-open="about">[About]</a>
+    <a href="#experience" data-open="experience">[Experience]</a>
+    <a href="#projects"   data-open="projects">[Projects]</a>
+    <a href="#activities" data-open="activities">[Activities]</a>
+  </nav>
 </main>
 
-<!-- About -->
+<!-- Utility contact links -->
+<div class="util" aria-label="Contact links">
+  <a href="mailto:h.scharbrodt@gmail.com" aria-label="Email">Email</a>
+  <a href="https://github.com/schhadi" target="_blank" rel="noopener" aria-label="GitHub">GitHub</a>
+  <a href="https://www.linkedin.com/in/hadischarbrodt" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+</div>
+
+<!-- About (fade-blur) -->
 <div id="about" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="about-title">
   <button class="close" aria-label="Close">×</button>
   <div class="overlay-content">
     <h2 id="about-title">About Me</h2>
     <ul style="list-style:none; padding:0; margin:1rem 0 0; font-size:14px; color:#555;">
-      <li>I'm Hadi - an 18 year old programmer and asipring entrepreneur</li>
+      <li>I'm Hadi — an 18-year-old programmer and aspiring entrepreneur</li>
       <li>Lived in <strong>6 countries</strong> — fluent in English, Arabic, and Swedish</li>
       <li>Passionate about <strong>ed-tech, AI, and entrepreneurship</strong></li>
       <li>Stack: Python · Next.js · Tailwind · SQL · Git</li>
@@ -198,11 +239,10 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   </div>
 </div>
 
-
-<!-- Experience -->
+<!-- Experience (slide) -->
 <div id="experience" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="exp-title">
-  <button class="close" aria-label="Close">×</button>
   <div class="panel">
+    <button class="close-inline" aria-label="Close Experience">×</button>
     <div class="overlay-content">
       <h2 id="exp-title">Experience</h2>
       <ul>
@@ -213,18 +253,18 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   </div>
 </div>
 
-<!-- Projects -->
+<!-- Projects (fade-blur) -->
 <div id="projects" class="overlay fade-blur" role="dialog" aria-modal="true" aria-labelledby="proj-title">
   <div class="overlay-content">
     <h2 id="proj-title">Projects</h2>
     <ul>
       <li>
         <button class="proj-btn" data-pop="sort" style="all:unset;cursor:pointer;font-weight:700">Sorting Algorithm Analyzer</button>
-        — <strong> Problem </strong>: students don’t understand the importance of algorithmic complexity. <strong> Solution </strong>: live visualizer + time benchmarks. <strong> Impact </strong>: Students understand the importance 
+        — <strong>Problem</strong>: students don’t grasp algorithmic complexity. <strong>Solution</strong>: live visualizer + time benchmarks. <strong>Impact</strong>: clearer intuition.
       </li>
       <li>
         <button id="openQuiz" class="proj-btn" style="all:unset;cursor:pointer;font-weight:700">IB Psychology Quiz App</button>
-        — <strong> Problem </strong>: info overload from IB. <strong> Solution </strong>: spaced flashcards with “study/concepts” scaffolding. <strong> Impact </strong>: session length, repeat users, or anecdotal wins.
+        — <strong> Problem </strong>: info overload from IB. <strong> Solution </strong>: spaced flashcards with “study/concepts” scaffolding. <strong> Impact </strong>: session length, repeat users, or anecdotal wins..
       </li>
       <li><strong>ISL Voice Assistant</strong> — <strong> Problem </strong>: New students find it hard to navigate around the school. <strong> Solution </strong>: Make a bot that helps students find their way. <strong> Impact </strong>: Quality of Life for students increase.</li>
     </ul>
@@ -232,12 +272,12 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   </div>
 </div>
 
-<!-- Activities -->
+<!-- Activities (slide) -->
 <div id="activities" class="overlay slide" role="dialog" aria-modal="true" aria-labelledby="act-title">
-  <button class="close" aria-label="Close">×</button>
   <div class="panel">
+    <button class="close-inline" aria-label="Close Activities">×</button>
     <div class="overlay-content">
-      <h2 id="act-title">Activities & Volunteering</h2>
+      <h2 id="act-title">Activities &amp; Volunteering</h2>
       <ul>
         <li><strong>Shatila Community Centre, Beirut (2025)</strong> — Youth English & cultural workshops.</li>
         <li><strong>European Youth Week (2024)</strong> — Sweden rep at EU sustainability & digital forums.</li>
@@ -297,45 +337,209 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   </div>
 </dialog>
 
+<!-- Scripts -->
 <script>
-/* Intro → nav reveal (line only) */
+/* —— Loader logic: readable quote + slower progress + skip —— */
 (() => {
   const intro = document.getElementById('intro');
-  const prev = document.body.style.overflow;
-  document.body.style.overflow = 'hidden';
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  setTimeout(() => {
+  const quoteCharsEl = document.getElementById('quoteChars');
+  const pctEl = document.getElementById('loaderPct');
+  const skipBtn = document.getElementById('skipLoader');
+  const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const quote = "“Hadi is a well-organized, promising and intelligent student — worldly-minded, open to challenges, and able to thrive in any cultural environment.”";
+
+  function injectChars(text){
+    let html = '';
+    for (const ch of text) {
+      const safe = (ch === ' ' ? '&nbsp;' : String(ch)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+      html += `<span class="char">${safe}</span>`;
+    }
+    quoteCharsEl.innerHTML = html;
+  }
+  injectChars(quote);
+
+  const chars = Array.from(quoteCharsEl.querySelectorAll('.char'));
+  const perCharDelay = 18, baseDelay = 280, readHold = 900, progressDur = 1800, fadeBuffer = 240, minTotal = 4500;
+
+  const quoteRevealDur = prefersReduced ? 0 : (chars.length * perCharDelay + baseDelay);
+  const plannedTotal = quoteRevealDur + readHold + progressDur + fadeBuffer;
+  const pad = Math.max(0, minTotal - plannedTotal);
+
+  if (!prefersReduced) {
+    chars.forEach((el, i) => setTimeout(() => el.classList.add('show'), baseDelay + i * perCharDelay));
+  } else {
+    chars.forEach(el => el.classList.add('show'));
+  }
+
+  let progressStartTime = null;
+  function runProgress(ts){
+    if (!progressStartTime) progressStartTime = ts;
+    const t = Math.min(1, (ts - progressStartTime) / progressDur);
+    const p = Math.floor(t * 100);
+    pctEl.textContent = p;
+    intro.style.setProperty('--w', p + '%');
+    intro.classList.add('progress');
+    if (t < 1) requestAnimationFrame(runProgress);
+    else finish();
+  }
+  function startProgress(){
+    if (prefersReduced){
+      pctEl.textContent = 100; intro.style.setProperty('--w','100%'); finish(); return;
+    }
+    requestAnimationFrame(runProgress);
+  }
+  function finish(){
+    setTimeout(() => {
+      document.body.classList.add('ready');
+      intro.classList.add('done');
+      intro.addEventListener('transitionend', () => intro.remove(), { once:true });
+    }, fadeBuffer + pad);
+  }
+
+  setTimeout(() => { setTimeout(startProgress, readHold); }, quoteRevealDur);
+
+  skipBtn.addEventListener('click', () => {
+    pctEl.textContent = 100;
+    intro.style.setProperty('--w','100%');
     document.body.classList.add('ready');
     intro.classList.add('done');
-    intro.addEventListener('transitionend', () => { intro.remove(); document.body.style.overflow = prev; }, { once:true });
-  }, reduced ? 250 : 1100);
+    intro.addEventListener('transitionend', () => intro.remove(), { once:true });
+  });
 })();
+</script>
 
-/* Overlays open/close + tap outside */
+<script>
+// —— Swipe-to-close for overlays ——
+(() => {
+  const ACTIVE_SEL = '.overlay.active';
+  let startX=0, startY=0, dx=0, dy=0, tracking=false;
+
+  function onStart(e){
+    const t = e.touches?.[0]; if(!t) return;
+    const o = document.querySelector(ACTIVE_SEL); if(!o) return;
+    tracking = true; startX = t.clientX; startY = t.clientY; dx = dy = 0;
+  }
+  function onMove(e){
+    if(!tracking) return;
+    const t = e.touches?.[0]; if(!t) return;
+    dx = t.clientX - startX; dy = t.clientY - startY;
+  }
+  function onEnd(){
+    if(!tracking) return; tracking=false;
+    const o = document.querySelector(ACTIVE_SEL); if(!o) return;
+
+    const isSlide = o.classList.contains('slide');
+    const H_THRESH = 48, V_THRESH = 64;
+
+    if (isSlide && Math.abs(dx) > H_THRESH && Math.abs(dx) > Math.abs(dy)) {
+      if (history.state && history.state.modal) history.back();
+      else { o.classList.remove('active'); document.body.style.overflow=''; }
+      return;
+    }
+    if (!isSlide && dy > V_THRESH && Math.abs(dy) > Math.abs(dx)) {
+      if (history.state && history.state.modal) history.back();
+      else { o.classList.remove('active'); document.body.style.overflow=''; }
+    }
+  }
+
+  document.addEventListener('touchstart', onStart, {passive:true});
+  document.addEventListener('touchmove', onMove,   {passive:true});
+  document.addEventListener('touchend',  onEnd,    {passive:true});
+})();
+</script>
+
+<script>
+// —— Overlay controller (unified) ——
 (() => {
   const openers = document.querySelectorAll('[data-open]');
-  openers.forEach(btn => btn.addEventListener('click', () => {
-    const el = document.getElementById(btn.dataset.open);
+  let lastOpener = null;
+
+  const getActive = () => document.querySelector('.overlay.active');
+
+  function openOverlay(id){
+    const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('active');
     document.body.style.overflow = 'hidden';
-  }));
-  const overlays = document.querySelectorAll('.overlay');
-  const closeOverlay = (el) => { el.classList.remove('active'); document.body.style.overflow = ''; };
-  overlays.forEach(o => {
-    const x = o.querySelector('.close');
-    if (x) x.addEventListener('click', () => closeOverlay(o));
-    o.addEventListener('click', (e) => {
-      const panel = o.querySelector('.panel');
-      const content = o.querySelector('.overlay-content');
-      const outsidePanel  = panel && !panel.contains(e.target);
-      const outsideCenter = !panel && content && !content.contains(e.target);
-      if (outsidePanel || outsideCenter || e.target === o) closeOverlay(o);
-    });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && o.classList.contains('active')) closeOverlay(o); });
-  });
-})();
+    (el.querySelector('.close-inline') || el.querySelector('.close'))?.focus();
+  }
 
+  function closeOverlay(el){
+    if (!el) return;
+    el.classList.remove('active');
+    document.body.style.overflow = '';
+    lastOpener?.focus();
+  }
+
+  function closeAll(){
+    document.querySelectorAll('.overlay.active').forEach(o => o.classList.remove('active'));
+    document.body.style.overflow = '';
+    lastOpener?.focus();
+  }
+
+  // Open via nav (with history)
+  openers.forEach(a => a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const id = a.dataset.open;
+    lastOpener = a;
+    history.pushState({modal:id}, '', `#${id}`);
+    openOverlay(id);
+  }));
+
+  // Close buttons (.close, .close-inline, [data-close])
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.close, .close-inline, [data-close]');
+    if (!btn) return;
+    if (history.state && history.state.modal) {
+      history.back();
+    } else {
+      closeOverlay(getActive());
+    }
+  });
+
+  // Outside click to close
+  document.addEventListener('click', (e) => {
+    const o = getActive(); if (!o) return;
+
+    if (o.classList.contains('slide')) {
+      const panel = o.querySelector('.panel');
+      // close only if the bare overlay backdrop is clicked
+      if (panel && !panel.contains(e.target) && o === e.target) {
+        if (history.state && history.state.modal) history.back(); else closeOverlay(o);
+      }
+      return;
+    }
+
+    const content = o.querySelector('.overlay-content');
+    const clickedOutsideCenter = content && !content.contains(e.target) && o === e.target;
+    if (clickedOutsideCenter) {
+      if (history.state && history.state.modal) history.back(); else closeOverlay(o);
+    }
+  });
+
+  // ESC to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const o = getActive(); if (!o) return;
+    if (history.state && history.state.modal) history.back(); else closeOverlay(o);
+  });
+
+  // Back button / popstate
+  window.addEventListener('popstate', () => { closeAll(); });
+
+  // If landing with a hash, open it
+  if (location.hash) {
+    const id = location.hash.slice(1);
+    if (document.getElementById(id)?.classList.contains('overlay')) {
+      openOverlay(id);
+    }
+  }
+})();
+</script>
+
+<script>
 /* Sorting popover with merge-sort animation */
 (() => {
   const trigger = document.querySelector('[data-pop="sort"]');
@@ -400,7 +604,9 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
     trigger.addEventListener('touchstart',(e)=>{ e.preventDefault(); show(e.touches[0]); setTimeout(hide,2500); },{passive:false});
   }
 })();
+</script>
 
+<script>
 /* Quiz dialog open/close */
 (() => {
   const btn = document.getElementById('openQuiz');
@@ -417,5 +623,6 @@ dialog[open]::backdrop{background:rgba(0,0,0,.28);backdrop-filter:blur(2px)}
   });
 })();
 </script>
+
 </body>
 </html>
