@@ -91,14 +91,17 @@ li{margin:.35rem 0}
 .fade-blur .overlay-content{max-width:36rem;padding:1rem 2rem;text-align:center;color:#333;line-height:1.55;transform:translateY(6px);opacity:0;transition:opacity .25s ease,transform .25s ease}
 .fade-blur.active .overlay-content{opacity:1;transform:none}
 
-/* Slide-in panel style */
-.slide{background:transparent;transition:opacity .2s ease}
+/* Slide-in panel style — centered content */
 .slide .panel{
   position:absolute;top:0;right:0;height:100%;width:min(520px,90vw);background:#fff;
   border-left:1px solid var(--line);box-shadow:0 0 40px rgba(0,0,0,.06);
-  display:flex;align-items:flex-start;justify-content:center;padding:2rem 2rem 3.5rem;
+  display:flex;
+  align-items:center;          /* center vertically */
+  justify-content:center;      /* center horizontally */
+  padding:2rem 2rem 3.5rem;
   transform:translateX(100%);transition:transform .35s ease;overflow:auto;-webkit-overflow-scrolling:touch;
 }
+
 .slide.active .panel{transform:none}
 
 /* Top-right utility links */
